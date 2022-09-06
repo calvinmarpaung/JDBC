@@ -1,8 +1,9 @@
-package springboot.service;
+package com.springboot.service;
 
-import springboot.model.Book;
+import com.springboot.model.Book;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -13,19 +14,46 @@ import java.util.List;
 
 
 @Repository
-public class NamedParameterJdbcBookRepository extends JdbcBook {
-
+public class NamedParameterJdbcBookRepository implements BookRepo{
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
-    @Override
-    public int update(Book book) {
+    //Empty Constructor
+    public NamedParameterJdbcBookRepository() {
+    }
+
+    public int save(Book book) {
+        return jdbcTemplate.update(
+                "insert into books ( name, price) values(?,?)",
+                book.getName(), book.getPrice());
+    }
+
+    public int updatePrice(Book book) {
         return namedParameterJdbcTemplate.update(
                 "update books set price = :price where id = :id",
                 new BeanPropertySqlParameterSource(book));
     }
 
-    @Override
+    public int deleteById(Long id) {
+        return jdbcTemplate.update(
+                "delete from books where id = ?",
+                id);
+    }
+
+    public List<Book> findAll() {
+        return jdbcTemplate.query(
+                "select * from books",
+                (rs, rowNum) ->
+                        new Book(
+                                rs.getLong("id"),
+                                rs.getString("name"),
+                                rs.getBigDecimal("price")
+                        )
+        );
+    }
+
     public Book findById(Long id) {
         return namedParameterJdbcTemplate.queryForObject(
                 "select * from books where id = :id",
@@ -39,23 +67,12 @@ public class NamedParameterJdbcBookRepository extends JdbcBook {
         );
     }
 
-    @Override
-    public List<Book> findByNameAndPrice(String name, BigDecimal price) {
-
-        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
-        mapSqlParameterSource.addValue("name", "%" + name + "%");
-        mapSqlParameterSource.addValue("price", price);
-
-        return namedParameterJdbcTemplate.query(
-                "select * from books where name like :name and price <= :price",
-                mapSqlParameterSource,
-                (rs, rowNum) ->
-                        new Book(
-                                rs.getLong("id"),
-                                rs.getString("name"),
-                                rs.getBigDecimal("price")
-                        )
+    public int dropTable(){
+        return jdbcTemplate.update(
+                "truncate table books"
         );
     }
+
+
 
 }

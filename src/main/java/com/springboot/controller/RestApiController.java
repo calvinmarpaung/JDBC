@@ -1,8 +1,7 @@
-package springboot.controller;
+package com.springboot.controller;
 
-import springboot.model.Book;
-import springboot.service.BookRepo;
-import springboot.util.CustomErrorType;
+import com.springboot.model.Book;
+import com.springboot.service.BookRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +28,7 @@ public class RestApiController{
     public ResponseEntity<List<Book>> listAllBooks() throws SQLException, ClassNotFoundException {
         List<Book> books = bookRepo.findAll();
 
-//        if (books.isEmpty()) {
-//            return new ResponseEntity(books, HttpStatus.NOT_FOUND);
-//        }
+
         ResponseEntity responseEntity = new ResponseEntity(books, HttpStatus.OK);
         return responseEntity;
     }
@@ -42,10 +39,7 @@ public class RestApiController{
     public ResponseEntity getBook(@PathVariable("id") long id) throws SQLException, ClassNotFoundException {
         logger.info("Fetching Book with id {}", id);
         Book book = bookRepo.findById(id);
-//        if (book == null) {
-//            logger.error("Book with id {} not found.", id);
-//            return new ResponseEntity<>(new CustomErrorType("Book with id " + id  + " not found"), HttpStatus.NOT_FOUND);
-//        }
+
 
         ResponseEntity responseEntity = new ResponseEntity(book, HttpStatus.OK);
         return responseEntity;
@@ -56,37 +50,23 @@ public class RestApiController{
     // Save to DB - Insert to Database
     @RequestMapping(value = "/book/", method = RequestMethod.POST, produces="application/json")
     public ResponseEntity createBook(@RequestBody Book book) throws SQLException, ClassNotFoundException {
-        logger.info("Creating Book : {}", book);
+        logger.info("Creating Book :", book);
 
-//        if (bookService.isBookExist(book)) {
-//            logger.error("Unable to create. A Book with name {} already exist", book.getName());
-//            return new ResponseEntity<>(new CustomErrorType("Unable to create. A Book with name " +
-//                    book.getName() + " already exist."), HttpStatus.CONFLICT);
-//        }
         bookRepo.save(book);
 
         return new ResponseEntity<>(book, HttpStatus.CREATED);
     }
 
-    // ------------------- Update a Book ------------------------------------------------
+    // ------------------- Update book Price ------------------------------------------------
     // Save to DB - Insert to Database
     @RequestMapping(value = "/book/{id}", method = RequestMethod.PUT)
     public ResponseEntity<?> updateBook(@PathVariable("id") long id, @RequestBody Book book) throws SQLException, ClassNotFoundException {
         logger.info("Updating Book with id {}", id);
 
         Book currentBook = bookRepo.findById(id);
-
-//        if (currentBook == null) {
-//            logger.error("Unable to update. Book with id {} not found.", id);
-//            return new ResponseEntity<>(new CustomErrorType("Unable to update. Book with id " + id + " not found."),
-//                    HttpStatus.NOT_FOUND);
-//        }
-
-        currentBook.setName(book.getName());
-
         currentBook.setPrice(book.getPrice());
 
-        bookRepo.update(currentBook);
+        bookRepo.updatePrice(currentBook);
         return new ResponseEntity<>(currentBook, HttpStatus.OK);
     }
 
@@ -95,25 +75,15 @@ public class RestApiController{
     @RequestMapping(value = "/book/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteBook(@PathVariable("id") long id) throws SQLException, ClassNotFoundException {
         logger.info("Fetching & Deleting Book with id {}", id);
-
-        Book book = bookRepo.findById(id);
-        if (book == null) {
-            logger.error("Unable to delete. Book with id {} not found.", id);
-            return new ResponseEntity<>(new CustomErrorType("Unable to delete. Book with id " + id + " not found."),
-                    HttpStatus.NOT_FOUND);
-        }
-        bookRepo.deleteBookById(id);
+        bookRepo.deleteById(id);
         return new ResponseEntity<Book>(HttpStatus.NO_CONTENT);
     }
 
     // ------------------- Delete All Books-----------------------------
 
-    @RequestMapping(value = "/book/", method = RequestMethod.DELETE)
-    public ResponseEntity<Book> deleteAllBooks() throws SQLException, ClassNotFoundException {
-        logger.info("Deleting All Books");
-
-        bookRepo.deleteAll();
+    @RequestMapping(value = "/delete/all", method = RequestMethod.DELETE)
+    public ResponseEntity<Book> deleteTable() throws SQLException, ClassNotFoundException {
+        bookRepo.dropTable();
         return new ResponseEntity<Book>(HttpStatus.NO_CONTENT);
     }
-
 }

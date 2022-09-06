@@ -1,0 +1,31 @@
+A). Save book :
+PUT http://localhost:8080/api/book/
+
+with Body
+{
+    "name": "BookName",
+    "price": 9999
+}
+
+B). Retrieve all books:
+GET http://localhost:8080/api/book/
+
+C). Get one book by ID:
+GET http://localhost:8080/api/book/{id}
+*input the id without {}
+
+D) Update book price:
+PUT http://localhost:8080/api/book/{id}
+
+with Body
+{
+    "name": "BookName",
+    "price": 10000
+}
+*new price inserted
+
+E). Delete one book by ID:
+DELETE http://localhost:8080/api/book/{id}
+
+F). Delete all:
+DELETE http://localhost:8080/api/book/

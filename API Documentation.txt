@@ -13,6 +13,7 @@ GET http://localhost:8080/api/book/
 C). Get one book by ID:
 GET http://localhost:8080/api/book/{id}
 *input the id without {}
+*yihaa
 
 D) Update book price:
 PUT http://localhost:8080/api/book/{id}
